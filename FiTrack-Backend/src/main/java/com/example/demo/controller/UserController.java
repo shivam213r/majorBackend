@@ -1,7 +1,9 @@
 package com.example.demo.controller;
 
-import java.util.Map;
 
+
+
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -10,6 +12,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -34,15 +37,18 @@ public class UserController {
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@RequestBody UserEntity user) {
         try {
+        	user.setRole("USER");
             UserEntity newUser = userService.registerUser(user);
             return ResponseEntity.ok(newUser);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Error: " + e.getMessage());
         }
     }
+
     @PostMapping("/login")
     public ResponseEntity<?> loginUser(@RequestBody LoginRequest loginRequest) {
         try {
+        	
             String token = userService.loginUser(loginRequest.getEmail(), loginRequest.getPassword());
             
 
@@ -64,5 +70,36 @@ public class UserController {
             return ResponseEntity.badRequest().body("Error: " + e.getMessage());
         }
     }
-    
+    @PutMapping("/profile")
+    public ResponseEntity<?> updateProfile(@RequestBody UserEntity profileData) {
+        try {
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            UserEntity currentUser = (UserEntity) auth.getPrincipal();
+            
+            UserEntity updatedUser = userService.updateProfile(currentUser.getEmail(), profileData);
+            return ResponseEntity.ok(updatedUser);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error: " + e.getMessage());
+        }
+    }
+
+    @PutMapping("/password")
+    public ResponseEntity<?> changePassword(@RequestBody Map<String, String> passwordData) {
+        try {
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            UserEntity currentUser = (UserEntity) auth.getPrincipal();
+            
+            String currentPassword = passwordData.get("currentPassword");
+            String newPassword = passwordData.get("newPassword");
+            
+            if (currentPassword == null || newPassword == null) {
+                return ResponseEntity.badRequest().body("Current password and new password are required");
+            }
+            
+            userService.changePassword(currentUser.getEmail(), currentPassword, newPassword);
+            return ResponseEntity.ok("Password changed successfully");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error: " + e.getMessage());
+        }
+    }
 }

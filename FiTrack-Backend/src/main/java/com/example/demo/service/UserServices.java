@@ -19,6 +19,76 @@ public class UserServices {
 
   
     private BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+    
+ 
+
+    public UserEntity updateProfile(String email, UserEntity profileData) {
+        UserEntity existingUser = getUserByEmail(email);
+        
+        // Check username uniqueness (if username is being changed)
+        if (profileData.getUsername() != null && 
+            !profileData.getUsername().equals(existingUser.getUsername())) {
+            if (userRepository.existsByUsernameAndIdNot(profileData.getUsername(), existingUser.getId())) {
+                throw new RuntimeException("Username already exists");
+            }
+            existingUser.setUsername(profileData.getUsername());
+        }
+        
+        // Update allowed fields only
+        if (profileData.getFname() != null) {
+            existingUser.setFname(profileData.getFname());
+        }
+        if (profileData.getLname() != null) {
+            existingUser.setLname(profileData.getLname());
+        }
+        if (profileData.getWeight() != null) {
+            existingUser.setWeight(profileData.getWeight());
+        }
+        if (profileData.getHeight() != null) {
+            existingUser.setHeight(profileData.getHeight());
+        }
+        if (profileData.getActivity() != null) {
+            // Validate activity level
+            if (isValidActivityLevel(profileData.getActivity())) {
+                existingUser.setActivity(profileData.getActivity());
+            } else {
+                throw new RuntimeException("Invalid activity level");
+            }
+        }
+        
+        return userRepository.save(existingUser);
+    }
+
+    public void changePassword(String email, String currentPassword, String newPassword) {
+        UserEntity user = getUserByEmail(email);
+        
+        // Verify current password
+        if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
+            throw new RuntimeException("Current password is incorrect");
+        }
+        
+        // Validate new password (add your own rules)
+        if (newPassword == null || newPassword.length() < 6) {
+            throw new RuntimeException("New password must be at least 6 characters");
+        }
+        
+        // Update password
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+    }
+
+    private boolean isValidActivityLevel(String activity) {
+        return activity.equals("NOT_VERY_ACTIVE") || 
+               activity.equals("LIGHTLY_ACTIVE") || 
+               activity.equals("MODERATELY_ACTIVE") || 
+               activity.equals("HIGHLY_ACTIVE");
+    }
+
+    // Helper method if you don't have it
+    public UserEntity getUserByEmail(String email) {
+        return userRepository.findByEmail(email)
+            .orElseThrow(() -> new RuntimeException("User not found"));
+    }
 
     // Register a new user
     public UserEntity registerUser(UserEntity user) {
@@ -51,7 +121,7 @@ public class UserServices {
         }
 
         // Generate JWT token
-        return jwtUtils.generateToken(email);
+        return jwtUtils.generateToken(email, user.getRole());
     }
 
     // Get user details by username

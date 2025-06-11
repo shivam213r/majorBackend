@@ -9,6 +9,7 @@ import com.example.demo.model.*;
 public interface FoodDiaryRepository extends JpaRepository<FoodDiary,Long> {
 
 	Collection<FoodDiary> findByNameContainingIgnoreCase(String name);
+	 boolean existsByName(String name);
 	
 
 }

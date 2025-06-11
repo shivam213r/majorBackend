@@ -1,10 +1,12 @@
 package com.example.demo.controller;
 
+import java.time.LocalDate;
 import java.util.Collection;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -62,6 +64,15 @@ public class FoodLogController {
         }
     }
     
+    @GetMapping("/fetchDate")
+    public ResponseEntity<?> getDateLog(@RequestParam LocalDate date) {
+        try {
+            return ResponseEntity.ok(foodLogService.getDateLog(date));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error: " + e.getMessage());
+        }
+    }
+    
     @PutMapping("/update/{logId}")
     public ResponseEntity<?> updateFoodLog(
             @PathVariable Long logId, 
@@ -72,7 +83,16 @@ public class FoodLogController {
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Error: " + e.getMessage());
         }
-//        eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJleGFtcGxlM0BleGFtcGxlLmNvbSIsImlhdCI6MTc0NjgwMjI5MiwiZXhwIjoxNzQ2ODM4MjkyfQ.6qadTyITZw-_3WVxRgZlcCBDvxIhL-ZnBkxScEywCUQ
+    }
+    
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<?> deleteFoodLog(@PathVariable Long id) {
+        try {
+            foodLogService.deleteFoodLog(id);
+            return ResponseEntity.ok("Food log deleted");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error: " + e.getMessage());
+        }
     }
     
 }

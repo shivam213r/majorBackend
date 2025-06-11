@@ -15,7 +15,7 @@ import java.util.function.Function;
 public class JwtUtils {
 
   
-    private final String SECRET = "my-super-secret-key-that-is-very-long-32-bytes!"; // 👈 plain text (not base64)
+    private final String SECRET = "my-super-secret-key-that-is-very-long-32-bytes!"; 
 
     private final long EXPIRATION_TIME = 1000 * 60 * 60 * 10; // 10 hours
 
@@ -47,9 +47,10 @@ public class JwtUtils {
         return extractExpiration(token).before(new Date());
     }
 
-    public String generateToken(String email) {
+    public String generateToken(String email,String role) {
         return Jwts.builder()
                 .setSubject(email)
+                .claim("role", role)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
                 .signWith(SECRET_KEY, SignatureAlgorithm.HS256) 

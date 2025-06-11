@@ -23,9 +23,9 @@ public class WorkoutLogController {
     private WorkoutLogServices workoutLogServices;
 
     @PostMapping
-    public WorkoutLogResponseDTO logWorkout(@RequestBody WorkoutLogRequestDTO request) {
+    public ResponseEntity<?> logWorkout(@RequestBody WorkoutLogRequestDTO request) {
         WorkoutLog log = workoutLogServices.logWorkout(request.getWorkoutId(), request.getSets(), request.getQuantity());
-        return WorkoutLogResponseDTO.fromEntity(log);
+        return ResponseEntity.ok(log);
     }
     
     @GetMapping("/search")
@@ -59,9 +59,16 @@ public class WorkoutLogController {
                 .collect(Collectors.toList());
     }
 
-    @PutMapping("/{logId}")
+    @PutMapping("update/{logId}")
     public WorkoutLogResponseDTO updateWorkoutLog(@PathVariable Long logId, @RequestBody WorkoutLogRequestDTO request) {
-        WorkoutLog log = workoutLogServices.updateLog(logId, request.getWorkoutId(), request.getQuantity());
+        WorkoutLog log = workoutLogServices.updateLog(logId, request.getWorkoutId(), request.getSets(), request.getQuantity());
         return WorkoutLogResponseDTO.fromEntity(log);
     }
+    
+    @DeleteMapping("delete/{logId}")
+    public ResponseEntity<?> deleteWorkoutLog(@PathVariable Long logId) {
+        workoutLogServices.deleteLog(logId);
+        return ResponseEntity.ok().build();
+    }
+
 }

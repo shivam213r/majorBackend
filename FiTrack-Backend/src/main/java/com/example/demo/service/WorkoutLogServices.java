@@ -71,7 +71,7 @@ public class WorkoutLogServices {
         return workoutLogRepository.findByUserIdAndDate(user.getId(), date);
     }
 
-    public WorkoutLog updateLog(Long logId, Long workoutId, Double newQuantity) {
+    public WorkoutLog updateLog(Long logId, Long workoutId, Integer sets, Double newQuantity){
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         UserEntity user = (UserEntity) auth.getPrincipal();
 
@@ -89,10 +89,26 @@ public class WorkoutLogServices {
 
         log.setWorkout(workout);
         log.setQuantity(newQuantity);
+        log.setSets(sets);
         log.setCaloriesBurned(newCaloriesBurned);
 
         return workoutLogRepository.save(log);
     }
+    
+    public void deleteLog(Long logId) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        UserEntity user = (UserEntity) auth.getPrincipal();
+
+        WorkoutLog log = workoutLogRepository.findById(logId)
+                .orElseThrow(() -> new RuntimeException("Workout log not found"));
+
+        if (!log.getUser().getId().equals(user.getId())) {
+            throw new SecurityException("Unauthorized to delete this log");
+        }
+
+        workoutLogRepository.delete(log);
+    }
+
 
 	public Collection<WorkoutDiary> searchWorkout(String query) {
 		  if (query == null || query.trim().isEmpty()) {

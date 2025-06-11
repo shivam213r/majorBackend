@@ -8,4 +8,5 @@ import com.example.demo.model.Recipe;
 
 public interface RecipeRepository extends JpaRepository<Recipe, Long> {
     Page<Recipe> findByNameContainingIgnoreCase(String name, Pageable pageable);
+    boolean existsByName(String name);
 }

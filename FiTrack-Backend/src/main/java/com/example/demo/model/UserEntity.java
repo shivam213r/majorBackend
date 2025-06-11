@@ -37,6 +37,7 @@ public class UserEntity {
     private String adgoal1;
     private String adgoal2;
     private LocalDate dob;
+    private String role;
    
 
     private LocalDateTime createdAt;

@@ -4,6 +4,7 @@ import com.example.demo.model.FoodDiary;
 import com.example.demo.model.FoodLog;
 import com.example.demo.model.Meal;
 import com.example.demo.model.UserEntity;
+import com.example.demo.model.WorkoutLog;
 import com.example.demo.repository.FoodDiaryRepository;
 import com.example.demo.repository.FoodLogRepository;
 import com.example.demo.repository.UserRepository;
@@ -64,6 +65,12 @@ public class FoodLogServices {
         return foodLogRepository.findByUserIdAndLoggedAt(user.getId(), date);
     }
     
+    public Collection<FoodLog> getDateLog(LocalDate date) {
+    	Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        UserEntity user = (UserEntity) auth.getPrincipal();
+        return foodLogRepository.findByUserIdAndLoggedAt(user.getId(), date);
+    }
+    
     public Collection<FoodDiary> searchFood(String query) {
         if (query == null || query.trim().isEmpty()) {
         	return Collections.emptyList();
@@ -93,6 +100,20 @@ public class FoodLogServices {
         log.setQuantity(newQuantity);
 
         return foodLogRepository.save(log);
+    }
+    
+    public void deleteFoodLog(Long logId) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        UserEntity user = (UserEntity) auth.getPrincipal();
+
+        FoodLog log = foodLogRepository.findById(logId)
+            .orElseThrow(() -> new IllegalArgumentException("Log not found"));
+
+        if (!log.getUser().getId().equals(user.getId())) {
+            throw new SecurityException("You are not allowed to delete this log");
+        }
+
+        foodLogRepository.delete(log);
     }
 
 	
