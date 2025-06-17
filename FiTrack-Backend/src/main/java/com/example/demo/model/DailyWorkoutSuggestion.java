@@ -24,10 +24,5 @@ public class DailyWorkoutSuggestion {
     @Column(columnDefinition = "TEXT")
     private String suggestedWorkouts; // JSON string from Gemini
     
-    private LocalDateTime createdAt;
     
-    @PrePersist
-    protected void onCreate() {
-        this.createdAt = LocalDateTime.now();
-    }
 }

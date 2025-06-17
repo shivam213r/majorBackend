@@ -1,5 +1,7 @@
 package com.example.demo.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -10,6 +12,7 @@ public class RecipeNutrition {
     private Long recipeId;
 
     @OneToOne
+    @JsonIgnore
     @MapsId
     @JoinColumn(name = "recipe_id")
     private Recipe recipe;

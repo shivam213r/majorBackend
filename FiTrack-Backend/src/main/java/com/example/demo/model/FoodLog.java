@@ -31,6 +31,6 @@ public class FoodLog {
     @Column(name = "logged_at")
     private LocalDate loggedAt = LocalDate.now();
 
-    // Getters and setters
+   
 }
 

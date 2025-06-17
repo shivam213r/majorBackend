@@ -6,6 +6,7 @@ package com.example.demo.controller;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -54,8 +55,9 @@ public class UserController {
 
             return ResponseEntity.ok(token);
         } catch (Exception e) {
-        	System.out.println("hellooo login");
-            return ResponseEntity.status(405).body("Login Failed: hiiiiiiii " + e.getMessage());
+        	
+        	  return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                      .body("Login Failed: " + e.getMessage());
         }
         
     }

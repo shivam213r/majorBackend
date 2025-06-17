@@ -3,8 +3,10 @@ import com.example.demo.model.UserEntity;
 import com.example.demo.repository.UserRepository;
 import com.example.demo.utils.JwtUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Optional;
 
@@ -78,10 +80,10 @@ public class UserServices {
     }
 
     private boolean isValidActivityLevel(String activity) {
-        return activity.equals("NOT_VERY_ACTIVE") || 
-               activity.equals("LIGHTLY_ACTIVE") || 
-               activity.equals("MODERATELY_ACTIVE") || 
-               activity.equals("HIGHLY_ACTIVE");
+        return activity.equals("Not Very Active") || 
+               activity.equals("Lightly Active") || 
+               activity.equals("Moderately Active") || 
+               activity.equals("Highly Active");
     }
 
     // Helper method if you don't have it
@@ -110,16 +112,14 @@ public class UserServices {
         Optional<UserEntity> userOptional = userRepository.findByEmail(email);
 
         if (!userOptional.isPresent()) {
-            throw new IllegalArgumentException("User not found");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User not found");
         }
 
         UserEntity user = userOptional.get();
 
-        // Check if passwords match
         if (!passwordEncoder.matches(password, user.getPassword())) {
-            throw new IllegalArgumentException("Incorrect password");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Incorrect password");
         }
-
         // Generate JWT token
         return jwtUtils.generateToken(email, user.getRole());
     }

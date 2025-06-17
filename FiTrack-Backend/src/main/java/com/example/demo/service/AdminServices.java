@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import com.example.demo.model.FoodDiary;
 import com.example.demo.model.Recipe;
 import com.example.demo.model.RecipeIngredient;
+import com.example.demo.model.RecipeNutrition;
 import com.example.demo.model.RecipeStep;
 import com.example.demo.model.UserEntity;
 import com.example.demo.model.WorkoutDiary;
@@ -169,7 +170,7 @@ public class AdminServices {
 		    }
 		}
 
-		// RECIPE METHODS
+		
 		public List<Recipe> getAllRecipes() {
 		    return recipeRepository.findAll();
 		}
@@ -187,47 +188,56 @@ public class AdminServices {
 		    Optional<Recipe> existingRecipe = recipeRepository.findById(id);
 		    if (existingRecipe.isPresent()) {
 		        Recipe recipe = existingRecipe.get();
-		        
+
 		        // Check if name is being changed and if new name already exists (excluding current record)
-		        if (!recipe.getName().equals(updatedRecipe.getName()) && 
+		        if (!recipe.getName().equals(updatedRecipe.getName()) &&
 		            recipeRepository.existsByName(updatedRecipe.getName())) {
 		            throw new IllegalArgumentException("Recipe name already exists");
 		        }
-		        
-		        // Update basic fields - CORRECTED FIELD NAMES
+
+		        // Update basic fields
 		        recipe.setName(updatedRecipe.getName());
 		        recipe.setImageUrl(updatedRecipe.getImageUrl());
 		        recipe.setPrepTime(updatedRecipe.getPrepTime());
 		        recipe.setServingSize(updatedRecipe.getServingSize());
-		        
-		        // Update nutrition if provided
+
+		       
 		        if (updatedRecipe.getNutrition() != null) {
-		            recipe.setNutrition(updatedRecipe.getNutrition());
-		            recipe.getNutrition().setRecipe(recipe);
+		            RecipeNutrition newNutri = updatedRecipe.getNutrition();
+
+		            if (recipe.getNutrition() == null) {
+		                newNutri.setRecipe(recipe);
+		                recipe.setNutrition(newNutri);
+		            } else {
+		                RecipeNutrition existingNutri = recipe.getNutrition();
+		                existingNutri.setCalories(newNutri.getCalories());
+		                existingNutri.setProtein(newNutri.getProtein());
+		                existingNutri.setCarbs(newNutri.getCarbs());
+		                existingNutri.setFat(newNutri.getFat());
+		                existingNutri.setSugar(newNutri.getSugar());
+		            }
 		        }
-		        
-		        // Update ingredients if provided
+
+		        // Update ingredients
 		        if (updatedRecipe.getIngredients() != null) {
-		            // Clear existing ingredients
 		            recipe.getIngredients().clear();
-		            // Add new ingredients
 		            for (RecipeIngredient ingredient : updatedRecipe.getIngredients()) {
+		                ingredient.setId(null); 
 		                ingredient.setRecipe(recipe);
 		                recipe.getIngredients().add(ingredient);
 		            }
 		        }
-		        
-		        // Update steps if provided
+
+		        // Update steps
 		        if (updatedRecipe.getSteps() != null) {
-		            // Clear existing steps
 		            recipe.getSteps().clear();
-		            // Add new steps
 		            for (RecipeStep step : updatedRecipe.getSteps()) {
+		                step.setId(null); 
 		                step.setRecipe(recipe);
 		                recipe.getSteps().add(step);
 		            }
 		        }
-		        
+
 		        return recipeRepository.save(recipe);
 		    } else {
 		        throw new IllegalArgumentException("Recipe not found with id: " + id);
